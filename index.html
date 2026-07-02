@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ResumeIQ — AI-Powered Resume Screener</title>
+  <meta name="description" content="ResumeIQ is an AI-powered HR tool to upload, parse, score, and rank candidate resumes against your job description. Shortlist the best talent instantly." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- PDF.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════
+       SIDEBAR NAV
+  ════════════════════════════════════════════════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <svg class="logo-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="url(#logoGrad)"/>
+        <path d="M10 12h20M10 18h14M10 24h17M10 30h11" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="30" cy="26" r="7" fill="#22C55E"/>
+        <path d="M27 26l2 2 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <defs>
+          <linearGradient id="logoGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#6C63FF"/>
+            <stop offset="1" stop-color="#A78BFA"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <span class="logo-text">ResumeIQ</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" id="nav-dashboard" data-section="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a href="#" class="nav-item" id="nav-job" data-section="job">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+        Job Description
+      </a>
+      <a href="#" class="nav-item" id="nav-upload" data-section="upload">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Upload Resumes
+      </a>
+      <a href="#" class="nav-item" id="nav-candidates" data-section="candidates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Candidates
+        <span class="nav-badge" id="nav-candidates-count">0</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn-clear-all" id="btn-clear-all" title="Clear all candidate data">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        Clear All Data
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════════════════════════════════
+       MAIN CONTENT
+  ════════════════════════════════════════════════════ -->
+  <main class="main-content" id="main-content">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle Sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-right">
+        <div class="topbar-stats">
+          <span class="topbar-stat">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <span id="topbar-total">0</span> Candidates
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ─────────────────────────────────────────────
+         SECTION: DASHBOARD
+    ───────────────────────────────────────────── -->
+    <section class="section active" id="section-dashboard">
+      <div class="section-header">
+        <h1>Dashboard</h1>
+        <p class="section-subtitle">Overview of your screening pipeline</p>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="stats-grid">
+        <div class="stat-card stat-total">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-total">0</div>
+            <div class="stat-label">Total Applicants</div>
+          </div>
+          <div class="stat-trend" id="stat-total-trend"></div>
+        </div>
+
+        <div class="stat-card stat-shortlisted">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-shortlisted">0</div>
+            <div class="stat-label">Shortlisted</div>
+          </div>
+          <div class="stat-trend" id="stat-shortlisted-pct"></div>
+        </div>
+
+        <div class="stat-card stat-pending">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-pending">0</div>
+            <div class="stat-label">Pending Review</div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-rejected">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value" id="stat-rejected">0</div>
+            <div class="stat-label">Rejected</div>
+          </div>
+          <div class="stat-trend" id="stat-rejected-pct"></div>
+        </div>
+      </div>
+
+      <!-- Score Distribution + Top Candidates -->
+      <div class="dashboard-grid">
+        <!-- Score Distribution -->
+        <div class="glass-card">
+          <div class="card-header">
+            <h2>Score Distribution</h2>
+            <span class="card-badge">All Candidates</span>
+          </div>
+          <div class="score-chart" id="score-chart">
+            <div class="chart-empty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+              <p>Upload resumes to see score distribution</p>
+            </div>
+          </div>
+          <div class="chart-legend">
+            <span class="legend-item legend-high">■ High (≥70)</span>
+            <span class="legend-item legend-mid">■ Mid (40–69)</span>
+            <span class="legend-item legend-low">■ Low (&lt;40)</span>
+          </div>
+        </div>
+
+        <!-- Top Candidates -->
+        <div class="glass-card">
+          <div class="card-header">
+            <h2>Top Candidates</h2>
+            <button class="btn-text" id="dash-view-all">View All →</button>
+          </div>
+          <div class="top-candidates-list" id="top-candidates-list">
+            <div class="empty-state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              <p>No candidates yet</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Keywords Panel -->
+        <div class="glass-card">
+          <div class="card-header">
+            <h2>Active Keywords</h2>
+            <button class="btn-text" id="dash-edit-jd">Edit JD →</button>
+          </div>
+          <div class="active-keywords" id="dash-keywords">
+            <div class="empty-state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/></svg>
+              <p>Set a job description first</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Screening Progress -->
+        <div class="glass-card">
+          <div class="card-header">
+            <h2>Screening Progress</h2>
+          </div>
+          <div class="progress-section" id="progress-section">
+            <div class="progress-item">
+              <div class="progress-label">
+                <span>Shortlisted</span>
+                <span id="prog-shortlisted-pct">0%</span>
+              </div>
+              <div class="progress-bar-wrap">
+                <div class="progress-bar progress-bar-green" id="prog-shortlisted-bar" style="width:0%"></div>
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-label">
+                <span>Pending</span>
+                <span id="prog-pending-pct">0%</span>
+              </div>
+              <div class="progress-bar-wrap">
+                <div class="progress-bar progress-bar-yellow" id="prog-pending-bar" style="width:0%"></div>
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-label">
+                <span>Rejected</span>
+                <span id="prog-rejected-pct">0%</span>
+              </div>
+              <div class="progress-bar-wrap">
+                <div class="progress-bar progress-bar-red" id="prog-rejected-bar" style="width:0%"></div>
+              </div>
+            </div>
+            <div class="progress-avg-score">
+              <span class="avg-label">Average Match Score</span>
+              <span class="avg-value" id="avg-score">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────────────
+         SECTION: JOB DESCRIPTION
+    ───────────────────────────────────────────── -->
+    <section class="section" id="section-job">
+      <div class="section-header">
+        <h1>Job Description</h1>
+        <p class="section-subtitle">Define what you're looking for — keywords drive the scoring</p>
+      </div>
+
+      <div class="jd-layout">
+        <!-- JD Input -->
+        <div class="glass-card jd-card">
+          <div class="card-header">
+            <h2>Paste Job Description</h2>
+            <button class="btn-secondary btn-sm" id="btn-load-sample">Load Sample JD</button>
+          </div>
+          <textarea
+            id="jd-textarea"
+            class="jd-textarea"
+            placeholder="Paste the full job description here...&#10;&#10;Example:&#10;We are looking for a Senior React Developer with 5+ years of experience in JavaScript, TypeScript, Node.js, REST APIs, and AWS. Must have experience with SQL databases and Agile methodologies..."
+          ></textarea>
+          <div class="jd-actions">
+            <div class="exp-slider-wrap">
+              <label for="exp-slider">Min. Required Experience</label>
+              <div class="slider-row">
+                <input type="range" id="exp-slider" min="0" max="15" value="0" step="1" class="exp-slider" />
+                <span class="slider-val" id="exp-slider-val">Any</span>
+              </div>
+            </div>
+            <button class="btn-primary" id="btn-extract-keywords">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              Extract Keywords & Score
+            </button>
+          </div>
+        </div>
+
+        <!-- Keywords Panel -->
+        <div class="glass-card keywords-card">
+          <div class="card-header">
+            <h2>Extracted Keywords</h2>
+            <div class="card-header-right">
+              <span class="keyword-count-badge" id="keyword-count">0 keywords</span>
+              <button class="btn-text btn-add-keyword" id="btn-add-keyword">+ Add</button>
+            </div>
+          </div>
+          <div class="keywords-chips" id="keywords-chips">
+            <div class="empty-state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/></svg>
+              <p>Extract keywords from your job description</p>
+            </div>
+          </div>
+          <div class="add-keyword-row" id="add-keyword-row" style="display:none">
+            <input type="text" id="new-keyword-input" class="input-field" placeholder="Type a keyword..." />
+            <button class="btn-primary btn-sm" id="btn-confirm-add-keyword">Add</button>
+            <button class="btn-ghost btn-sm" id="btn-cancel-add-keyword">Cancel</button>
+          </div>
+
+          <div class="jd-tip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Click any keyword chip to remove it. More keywords = finer scoring granularity.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────────────
+         SECTION: UPLOAD RESUMES
+    ───────────────────────────────────────────── -->
+    <section class="section" id="section-upload">
+      <div class="section-header">
+        <h1>Upload Resumes</h1>
+        <p class="section-subtitle">Drag & drop or browse — supports PDF and TXT files</p>
+      </div>
+
+      <div class="upload-layout">
+        <!-- Drop Zone -->
+        <div class="glass-card upload-card">
+          <div class="drop-zone" id="drop-zone">
+            <div class="drop-zone-inner">
+              <div class="drop-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              </div>
+              <p class="drop-title">Drop resume files here</p>
+              <p class="drop-subtitle">or click to browse</p>
+              <div class="drop-formats">
+                <span class="format-badge">PDF</span>
+                <span class="format-badge">TXT</span>
+              </div>
+              <button class="btn-primary" id="btn-browse">Browse Files</button>
+              <input type="file" id="file-input" accept=".pdf,.txt" multiple style="display:none" />
+            </div>
+          </div>
+
+          <div class="upload-warning" id="upload-warning" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span id="upload-warning-msg"></span>
+          </div>
+        </div>
+
+        <!-- Processing Queue -->
+        <div class="glass-card queue-card">
+          <div class="card-header">
+            <h2>Processing Queue</h2>
+            <button class="btn-text" id="btn-clear-queue" style="display:none">Clear Done</button>
+          </div>
+          <div class="queue-list" id="queue-list">
+            <div class="empty-state" id="queue-empty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <p>No files queued yet</p>
+            </div>
+          </div>
+          <div class="queue-summary" id="queue-summary" style="display:none">
+            <div class="queue-stat">
+              <span class="qs-val" id="qs-total">0</span>
+              <span class="qs-label">Total</span>
+            </div>
+            <div class="queue-stat">
+              <span class="qs-val qs-success" id="qs-done">0</span>
+              <span class="qs-label">Done</span>
+            </div>
+            <div class="queue-stat">
+              <span class="qs-val qs-error" id="qs-failed">0</span>
+              <span class="qs-label">Failed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────────────────────────
+         SECTION: CANDIDATES
+    ───────────────────────────────────────────── -->
+    <section class="section" id="section-candidates">
+      <div class="section-header">
+        <h1>Candidates</h1>
+        <p class="section-subtitle">Review, filter, and manage your applicant pipeline</p>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar glass-card">
+        <div class="filter-search">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="filter-search" class="search-input" placeholder="Search by name or skill..." />
+        </div>
+        <div class="filter-controls">
+          <select id="filter-status" class="filter-select">
+            <option value="all">All Status</option>
+            <option value="shortlisted">Shortlisted</option>
+            <option value="pending">Pending</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          <select id="filter-sort" class="filter-select">
+            <option value="score-desc">Score: High → Low</option>
+            <option value="score-asc">Score: Low → High</option>
+            <option value="name-asc">Name: A → Z</option>
+            <option value="name-desc">Name: Z → A</option>
+          </select>
+          <div class="score-filter-wrap">
+            <label for="filter-min-score">Min Score</label>
+            <input type="range" id="filter-min-score" min="0" max="100" value="0" class="mini-slider" />
+            <span id="filter-min-score-val" class="slider-val">0%</span>
+          </div>
+        </div>
+        <div class="filter-quick-btns">
+          <button class="qbtn active" id="qbtn-all" data-filter="all">All</button>
+          <button class="qbtn qbtn-green" id="qbtn-shortlisted" data-filter="shortlisted">Shortlisted</button>
+          <button class="qbtn qbtn-yellow" id="qbtn-pending" data-filter="pending">Pending</button>
+          <button class="qbtn qbtn-red" id="qbtn-rejected" data-filter="rejected">Rejected</button>
+        </div>
+      </div>
+
+      <!-- Results count -->
+      <div class="results-info" id="results-info">
+        <span id="results-count">0 candidates</span>
+      </div>
+
+      <!-- Candidates Grid -->
+      <div class="candidates-grid" id="candidates-grid">
+        <div class="candidates-empty" id="candidates-empty">
+          <div class="empty-illustration">
+            <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="60" cy="60" r="60" fill="rgba(108,99,255,0.08)"/>
+              <path d="M40 85v-3a13 13 0 0113-13h14a13 13 0 0113 13v3" stroke="#6C63FF" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="60" cy="48" r="13" stroke="#6C63FF" stroke-width="3"/>
+              <path d="M75 30l8 8M83 30l-8 8" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M30 60h5M85 60h5" stroke="#6C63FF" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 2"/>
+            </svg>
+          </div>
+          <h3>No candidates yet</h3>
+          <p>Upload resumes in the <strong>Upload</strong> tab to get started</p>
+          <button class="btn-primary" id="empty-go-upload">Go to Upload →</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════
+       CANDIDATE DETAIL MODAL
+  ════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal" id="candidate-modal" role="dialog" aria-modal="true" aria-labelledby="modal-name">
+      <button class="modal-close" id="modal-close" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+
+      <div class="modal-header">
+        <div class="modal-avatar" id="modal-avatar">A</div>
+        <div class="modal-header-info">
+          <h2 class="modal-name" id="modal-name">Candidate Name</h2>
+          <div class="modal-meta">
+            <span class="modal-meta-item" id="modal-exp-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+              Experience: <strong id="modal-exp">—</strong>
+            </span>
+            <span class="modal-meta-item" id="modal-email-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <span id="modal-email">—</span>
+            </span>
+          </div>
+        </div>
+        <div class="modal-score-ring-wrap">
+          <div class="modal-score-ring" id="modal-score-ring">
+            <svg viewBox="0 0 80 80">
+              <circle class="ring-bg" cx="40" cy="40" r="34" />
+              <circle class="ring-fill" id="modal-ring-fill" cx="40" cy="40" r="34" stroke-dasharray="213.6" stroke-dashoffset="213.6" />
+            </svg>
+            <div class="ring-text">
+              <span class="ring-val" id="modal-score-val">0</span>
+              <span class="ring-pct">%</span>
+            </div>
+          </div>
+          <div class="ring-label">Match Score</div>
+        </div>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-tabs">
+          <button class="modal-tab active" data-tab="overview" id="mtab-overview">Overview</button>
+          <button class="modal-tab" data-tab="resume" id="mtab-resume">Resume Text</button>
+          <button class="modal-tab" data-tab="notes" id="mtab-notes">Notes</button>
+        </div>
+
+        <!-- Overview Tab -->
+        <div class="modal-tab-content active" id="mtab-content-overview">
+          <div class="modal-overview-grid">
+            <div class="overview-section">
+              <h3 class="overview-title">Matched Keywords</h3>
+              <div class="modal-matched-chips" id="modal-matched-chips"></div>
+            </div>
+            <div class="overview-section">
+              <h3 class="overview-title">Missing Keywords</h3>
+              <div class="modal-missing-chips" id="modal-missing-chips"></div>
+            </div>
+          </div>
+          <div class="score-breakdown">
+            <h3 class="overview-title">Score Breakdown</h3>
+            <table class="breakdown-table">
+              <thead>
+                <tr><th>Component</th><th>Score</th><th>Weight</th><th>Contribution</th></tr>
+              </thead>
+              <tbody id="breakdown-tbody">
+              </tbody>
+            </table>
+          </div>
+          <div class="modal-status-row">
+            <label for="modal-status-select">Status</label>
+            <select id="modal-status-select" class="filter-select">
+              <option value="pending">⏳ Pending</option>
+              <option value="shortlisted">✅ Shortlisted</option>
+              <option value="rejected">❌ Rejected</option>
+            </select>
+            <button class="btn-primary btn-sm" id="btn-modal-shortlist">Shortlist</button>
+            <button class="btn-danger btn-sm" id="btn-modal-reject">Reject</button>
+          </div>
+        </div>
+
+        <!-- Resume Text Tab -->
+        <div class="modal-tab-content" id="mtab-content-resume">
+          <div class="resume-text-box" id="modal-resume-text"></div>
+        </div>
+
+        <!-- Notes Tab -->
+        <div class="modal-tab-content" id="mtab-content-notes">
+          <textarea class="notes-textarea" id="modal-notes" placeholder="Add private notes about this candidate..."></textarea>
+          <button class="btn-primary" id="btn-save-notes">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v14a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Save Notes
+          </button>
+          <div class="notes-saved-msg" id="notes-saved-msg">✓ Notes saved!</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast"></div>
+
+  <!-- JavaScript Modules -->
+  <script src="js/parser.js"></script>
+  <script src="js/scorer.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
